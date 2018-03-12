@@ -3,11 +3,11 @@ import { App } from "./class/App";
 //On créé une instance de la classe App
 const app: App = new App();
 
-//Recupération des noms des magasins
-//const array = app.recupStoresName();
-
-//On affiche dynamiquement le formulaire des vendeurs
+//On affiche le formulaire des vendeurs
 app.createVendeurForm();
+
+//On affiche le formulaire des produits
+app.createProductForm();
 
 //On initialise la carte google maps
 app.initMap();
@@ -27,10 +27,46 @@ app.getFormMags().onsubmit = function ( event ) {
     app.registerStorage();
     //On reset le formulaire
     app.resetForm();
-    //On supprime le formulaire
+    //On supprime les formulaires vendeur et produit
     app.removeFormListVendeur();
-    //On recrée le formulaire avec le nouveau magasin
+    app.removeFormListProduct();
+    //On recrée les formulaires avec le nouveau magasin
     app.createVendeurForm();
+    app.createProductForm();
+
+}
+
+app.getFormProd().onsubmit = function ( event) {
+
+    event.preventDefault();
+
+    //Recuperation des elements selectionnés de la liste
+    let liste : HTMLSelectElement = document.getElementById("liste_prod") as HTMLSelectElement;
+    let result: any[] = [];
+    for (let i = 0, len = liste.length; i<len; i++ ) {
+        let opt = liste[i];
+
+        if(opt.selected) {
+            result.push(opt.value);
+        }
+    }
+
+    //On ajoute le produit
+    app.addProduct(result);
+
+    //On enregistre dans le localStorage
+    app.registerStorage();
+
+    //On reset le formulaire
+    app.resetForm();
+
+    //On supprime le formulaire
+    app.removeFormListProduct();
+
+    //On recrée le formulaire avec le nouveau magasin
+    app.createProductForm();
+
+
 }
 
 app.getFormVend().onsubmit = function ( event ) {

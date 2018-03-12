@@ -1,5 +1,6 @@
 import { Point } from "./Point";
 import { Vendeur } from "./Vendeur";
+import { Product } from "./Product";
 
 //La classe Marker est dédié au marqueur qui seront placés sur la carte
 //Permet de créer le marqueur et l'info bulle correspondante 
@@ -13,10 +14,14 @@ export class Marker {
     private infowindow: google.maps.InfoWindow;
 
 
+    //Tableau de vendeur du magasin
     private vendeur: Vendeur[];
 
+    //Tableau de produits du magasin
+    private product: Product[];
+
     //Le constructeur réalise toutes les opérations
-    constructor(map: google.maps.Map, position: Point, store: string, description: string, vendeur: Vendeur[]) {
+    constructor(map: google.maps.Map, position: Point, store: string, description: string, vendeur: Vendeur[] = [], product: Product[] = []) {
 
         this.position = position;
         this.store = store;
@@ -30,6 +35,9 @@ export class Marker {
         //Création du vendeur
         this.vendeur = vendeur;
 
+        //Creation produits
+        this.product = product;
+
     }
 
     //Methode magique qui fonctionne avec stringify
@@ -42,7 +50,8 @@ export class Marker {
             position: this.position,
             store: this.store,
             description: this.description,
-            vendeur: this.vendeur
+            vendeur: this.vendeur,
+            product: this.product
         }
     }
 
@@ -60,6 +69,10 @@ export class Marker {
 
     setVendeur(vendeur:Vendeur) {
         this.vendeur.push(vendeur);
+    }
+
+    setProduct(product: Product) {
+        this.product.push(product);
     }
 
     //On définit les paramètres du nouveau marqueur

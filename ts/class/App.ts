@@ -1,6 +1,7 @@
 import { Point } from "./Point";
 import { Marker } from "./Marker";
 import { Vendeur } from "./Vendeur";
+import { Product } from "./Product";
 
 //Constante de la clé du storage
 const STORAGE_KEY = "marker";
@@ -20,12 +21,14 @@ export class App {
     private latitude = document.getElementById("latitude") as HTMLInputElement;
     private longitude = document.getElementById("longitude") as HTMLInputElement;
 
-    private vendeur = document.getElementById("vendeur") as HTMLDivElement;
-
+    //Delaration du formulaire vendeur
     private form_vend = document.getElementById("form-vend") as HTMLFormElement;
-    private mag = document.getElementById("liste") as HTMLInputElement ;
-    private name = document.getElementById("name_vendeur") as HTMLInputElement;
-    private firstname = document.getElementById("firstname_vendeur") as HTMLInputElement;
+
+    //Déclaration du formulaire product avec ses inputs
+    private form_prod = document.getElementById("form-prod") as HTMLFormElement;
+    private label = document.getElementById("label") as HTMLInputElement;
+    private price = document.getElementById("price") as HTMLInputElement;
+    private image = document.getElementById("image") as HTMLInputElement;
 
     private remove = document.getElementById("remove") as HTMLFormElement;
 
@@ -36,19 +39,17 @@ export class App {
     //tableau qui contiendra tous les marqueurs (à sauver dans le localStorage)
     private markers: Marker[] = [];
 
-    //Tableau qui contiendra les vendeurs du magasin
-    private vendeurs: Vendeur[] = [];
+    // //Tableau qui contiendra les vendeurs du magasin
+    // private vendeurs: Vendeur[] = [];
+
+    // //Tableau qui contiendra les produits du magasin
+    // private products: Product[] = [];
 
     constructor() {
 
         this.position = new Point( 0, 0 );
         this.zoom = 4;
         
-    }
-
-    //Getter form-vend
-    getVend() :HTMLDivElement {
-        return this.vendeur;
     }
 
     //getter marker
@@ -102,6 +103,11 @@ export class App {
         return this.form_mags;
     }
 
+    //Getter du formulaire produit
+    getFormProd() {
+        return this.form_prod;
+    }
+
     //Getter pour le tableau de markers
     getTabMarkers(): Marker[] {
 
@@ -136,9 +142,45 @@ export class App {
 
         let vendeur = new Vendeur(name_vendeur, firstname_vendeur);
 
-        //this.vendeurs.push(vendeur);
+        this.updateVendeurMarker(mag, vendeur);
+    }
 
-        this.updateMarker(mag, vendeur);
+
+    //Ajout d'un nouveau produit
+    addProduct(result: any[]) {
+
+        console.log(this.label.value);
+
+        let product = new Product (this.label.value, this.price.value, this.image.value);
+
+        for (let res of result) {
+
+           this.updateProductMarker(res, product);
+        }
+
+    }
+
+    //On met à jour le marker avec le nouveau produit
+    updateProductMarker( mag :string, product: Product ) {
+
+        //On cherche le marqueur concerné
+        for(let marker of this.markers) {
+
+            if (marker.getStore() == mag) {
+
+                //On push le nouveau vendeur dans le tableau
+                marker.setProduct(product);
+
+                //On rajoute le contenu nom et prenom du nouveau vendeur dans l'infobulle
+                let content = marker.getInfoWindow().getContent();
+                content += "<p>" + product.getLabel() + " " + product.getPrice() + "</p>";
+                marker.getInfoWindow().setContent(content);
+
+                
+            }
+            
+        }
+
     }
 
     //Ajout du nouveau marqueur
@@ -150,7 +192,7 @@ export class App {
             parseFloat(this.getLongitude().value)
         );
 
-        this.marker = new Marker(this.getMap(), this.position, this.getStore().value, this.getDescription().value, this.vendeurs);
+        this.marker = new Marker(this.getMap(), this.position, this.getStore().value, this.getDescription().value, [], []);
 
         //Ajoute le nouveau marqueur au tableau de marqueur
         this.markers.push(this.marker);
@@ -158,7 +200,7 @@ export class App {
     }
 
     //On met à jour le marker avec le nouveau vendeur
-    updateMarker( mag :string, vendeur: Vendeur ) {
+    updateVendeurMarker( mag :string, vendeur: Vendeur ) {
 
         //On cherche le marqueur concerné
         for(let marker of this.markers) {
@@ -211,8 +253,19 @@ export class App {
 
             for (let mark of array) {
 
-                const marker: Marker = new Marker(this.map, new Point(mark.position.lat, mark.position.lng), mark.store, mark.description, mark.vendeur);
+                const marker: Marker = new Marker(this.map, new Point(mark.position.lat, mark.position.lng), mark.store, mark.description, mark.vendeur, mark.product);
 
+                
+                //S'il y a des produits, on met à jour l'infobulle avec leurs labels et leurs prix
+                for (let product of mark.product) {
+
+                    let content = marker.getInfoWindow().getContent();
+                    content += "<p>" + product.label + " " + product.price + "</p>";
+
+                    marker.getInfoWindow().setContent(content);
+
+                }
+                
                 //S'il y a des vendeurs, on met à jour l'infobulle avec leurs noms et prenoms
                 for (let vendor of mark.vendeur) {
 
@@ -231,11 +284,13 @@ export class App {
 
     }
 
+
+    //Création dynamique du reste du formulaire du vendeur (liste des magasins et bouton submit)
     createVendeurForm() {
 
         //Ajout du troisième label
          let mag_vendeur = document.createElement('label');
-         mag_vendeur.id = "shop";
+         mag_vendeur.id = "shop_vendeur";
          this.form_vend.appendChild(mag_vendeur);
 
         //Ajout span du troisieme label
@@ -274,12 +329,70 @@ export class App {
     
     }
 
+
+    //Creation dynamique du reste du formulaire product (liste des magasins et bouton submit)
+    createProductForm() {
+
+        //Ajout du troisième label
+         let mag_vendeur = document.createElement('label');
+         mag_vendeur.id = "shop_product";
+         this.form_prod.appendChild(mag_vendeur);
+
+        //Ajout span du troisieme label
+        let span_mag = document.createElement('span');
+        span_mag.innerText = "Magasin";
+        mag_vendeur.appendChild(span_mag);
+
+        //Creation de la liste deroulante
+        let list = document.createElement('select');
+        list.multiple = true;
+        list.name = "liste_prod";
+        list.id = "liste_prod";
+        mag_vendeur.appendChild(list);
+
+        //On recupere les noms des magasins et on les ajoute à la liste déroulante
+        let localS: any = localStorage.getItem( STORAGE_KEY );
+        let array: any[] = JSON.parse(localS);
+
+        if (array != null) {
+
+            for (let mark of array) {
+
+                let mag = document.createElement("option");
+                mag.innerText = mark.store;
+                list.appendChild(mag);
+
+            }
+        }
+
+        //Ajout du bouton submit
+        let product_submit = document.createElement('input');
+        product_submit.id = "add_product";
+        product_submit.name = "add_product";
+        product_submit.type = "submit";
+        product_submit.innerText ="Ajouter produit";
+        this.form_prod.appendChild(product_submit);
+    
+    }
+
+    //Suppression du contenu dynamique du formulaire vendeur
     removeFormListVendeur() {
 
-        let shop: HTMLElement = document.getElementById('shop') as HTMLElement;
+        let shop: HTMLElement = document.getElementById('shop_vendeur') as HTMLElement;
         let input: HTMLInputElement = document.getElementById('add_vendeur') as HTMLInputElement;
         shop.remove();   
         input.remove();     
+    }
+
+
+    //Suppression du contenu dynamique du formulaire product
+    removeFormListProduct() {
+
+        let shop: HTMLElement = document.getElementById('shop_product') as HTMLElement;
+        let input: HTMLInputElement = document.getElementById('add_product') as HTMLInputElement;
+        shop.remove();   
+        input.remove();
+
     }
 
 
@@ -298,11 +411,13 @@ export class App {
         //On vide le localStorage
         localStorage.removeItem(STORAGE_KEY);
 
-        //On supprime le formulaire
+        //On supprime les formulaires
         this.removeFormListVendeur();
+        this.removeFormListProduct();
 
-        //On le recrée avec les valeurs à jour
+        //On les recrée avec les valeurs à jour
         this.createVendeurForm();
+        this.createProductForm();
 
     }
 
