@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Magasin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div id="container">
+        <div id="map"></div>
+        <div id="interface">
+            <h3>Magasins</h3>
+            <form id="form-mags">
+                    <label><span>Magasin</span>
+                        <input type="text" name="store" id="store">
+                    </label>
+                    <label><span>Description</span>
+                        <textarea type="text" name="description" id="description"></textarea>
+                    </label>
+                    <label><span>Latitude</span>
+                        <input type="text" name="latitude" id="latitude">
+                    </label>
+                    <label><span>Longitude</span>
+                        <input type="text" name="longitude" id="longitude">
+                    </label>
+                    <input type="submit" value="Créer">
+            </form>
+            <hr>
+            <form id="remove">
+                <label><span>Supprimer les magasins</span>
+                    <input type="submit" value="tout supprimer">
+                </label>
+            </form>
+            <hr>
+            <h3>Vendeurs</h3>
+            <div id="vendeur">
+            
+                <form id="form-vend">
+
+                    <label><span>Nom</span>
+                        <input type="text" name="name_vendeur" id="name_vendeur">
+                    </label>
+                    <label><span>Prenom</span>
+                        <input type="text" name="firstname_vendeur" id="firstname_vendeur">
+                    </label>
+
+                </form>
+
+            </div>
+            <hr>
+            <h3>Produits</h3>
+            <div id="product">
+
+            </div>
+        </div>
+    </div>
+        <script src="system.js"></script>
+        <script src="main.js"></script>
+    
+        <script>
+            function initApp(){
+                System.import("main");
+            }
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwhwVM2KfIzY15v-xsme2RMOvLFg1WuIk&callback=initApp" async defer></script>
+    </body>
+</html>
